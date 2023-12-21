@@ -3,6 +3,9 @@ const express = require("express");
 const app = express();
 const port = 3000;
 
+//cors
+const cors = require("cors");
+
 //whatsapp api
 const { Client } = require("whatsapp-web.js");
 const client = new Client();
@@ -12,6 +15,8 @@ const QRCode = require("qrcode");
 
 //chat bot api dari obito
 const CHATBOT_API_URL = "https://be-chat-bot.vercel.app";
+
+app.use(cors());
 
 app.get("/", (req, res) => {
   //   res.send("Hello World!");
