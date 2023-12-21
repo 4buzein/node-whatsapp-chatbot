@@ -1,3 +1,8 @@
+//express
+const express = require("express");
+const app = express();
+const port = 3000;
+
 //whatsapp api
 const { Client } = require("whatsapp-web.js");
 const client = new Client();
@@ -8,31 +13,39 @@ const QRCode = require("qrcode");
 //chat bot api dari obito
 const CHATBOT_API_URL = "https://be-chat-bot.vercel.app";
 
-client.on("qr", (qr) => {
-  // Print the QR code to terminal
-  QRCode.toString(qr, { type: "terminal" }, function (err, QRcode) {
-    if (err) return console.log("error occurred");
+app.get("/", (req, res) => {
+  //   res.send("Hello World!");
 
-    // Printing the generated code
-    console.log(QRcode);
+  client.on("qr", (qr) => {
+    // Print the QR code to terminal
+    QRCode.toDataURL(qr, function (err, url) {
+      if (err) return console.log("error occurred");
+
+      //generate whatsapp QR Code
+      res.send(`<img src='${url}'>`);
+    });
   });
-});
 
-client.on("ready", () => {
-  console.log("Client is ready!");
-});
+  client.on("ready", () => {
+    res.send("Client is ready!");
+  });
 
-client.on("message", (msg) => {
-  if (msg.body.includes("/bot")) {
-    //chat gpt api
-    async function chatBot(question) {
-      const response = await fetch(CHATBOT_API_URL + "?question=" + question);
-      const data = await response.json();
-      msg.reply(data);
+  client.on("message", (msg) => {
+    if (msg.body.includes("/bot")) {
+      //chat gpt api
+      async function chatBot(question) {
+        const response = await fetch(CHATBOT_API_URL + "?question=" + question);
+        const data = await response.json();
+        msg.reply(data);
+      }
+
+      chatBot(msg.body);
     }
+  });
 
-    chatBot(msg.body);
-  }
+  client.initialize();
 });
 
-client.initialize();
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`);
+});
